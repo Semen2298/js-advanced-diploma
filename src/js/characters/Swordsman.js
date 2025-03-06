@@ -1,9 +1,10 @@
-import Character from '../Character'
+import Character from '../teamGeneration/Character';
 
 export default class Swordsman extends Character {
-    constructor(level) {
-        super(level, 'swordsman')
-        this.attack = 40;
-        this.defence = 10;
-      }
+  constructor(level) {
+    super(level);
+    this.attack = 40;
+    this.defence = 10;
+    this.type = 'swordsman';
+  }
 }

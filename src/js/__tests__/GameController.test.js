@@ -1,75 +1,206 @@
-import Character from '../Character';
 import Bowman from '../characters/Bowman';
 import Swordsman from '../characters/Swordsman';
 import Magician from '../characters/Magician';
-import { characterGenerator, generateTeam } from '../generators';
+import Vampire from '../characters/Vampire';
+import Undead from '../characters/Undead';
+import Daemon from '../characters/Daemon';
+import GamePlay from '../GamePlay';
+import GameController from '../GameController';
+import GameStateService from '../GameStateService';
+import { calculateMove, calculateAttack } from '../calcs/calcs';
 
-describe('Character class', () => {
-    test('should throw an error when trying to instantiate Character directly', () => {
-        expect(() => new Character(1)).toThrow();
-    });
 
-    test('should not throw an error for inherited classes', () => {
-        expect(() => new Bowman(1)).not.toThrow();
-        expect(() => new Swordsman(1)).not.toThrow();
-        expect(() => new Magician(1)).not.toThrow();
-    });
+const gamePlay = new GamePlay();
+gamePlay.container = document.createElement('div');
+gamePlay.bindToDOM(gamePlay.container);
+const stateService = new GameStateService(localStorage);
+const gameCtrl = new GameController(gamePlay, stateService);
+gameCtrl.init();
+
+const player = [{
+  character: {
+    level: 1,
+    attack: 40,
+    defence: 10,
+    health: 100,
+    type: 'swordsman',
+  },
+  position: 0,
+},
+{
+  character: {
+    level: 1,
+    attack: 25,
+    defence: 25,
+    health: 100,
+    type: 'bowman',
+  },
+  position: 8,
+},
+];
+
+const npc = [{
+  character: {
+    level: 1,
+    attack: 40,
+    defence: 10,
+    health: 100,
+    type: 'undead',
+  },
+  position: 1,
+},
+{
+  character: {
+    level: 1,
+    attack: 40,
+    defence: 10,
+    health: 100,
+    type: 'undead',
+  },
+  position: 63,
+},
+];
+
+gameCtrl.gameTeam.reloadGameSet(player, npc);
+gameCtrl.gamePlay.redrawPositions([...gameCtrl.gameTeam.player, ...gameCtrl.gameTeam.npc]);
+gameCtrl.isLocked = false;
+
+gameCtrl.onCellClick(0);
+const selectedIndex = 0;
+test('When player selected, cursor should be <pointer> style, cell should not be selected', () => {
+  const enteredIndex = 8;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('pointer');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected');
+  expect(selected).toBeFalsy();
 });
 
-describe('Character attributes', () => {
-    test('should have correct attributes for level 1 characters', () => {
-        const bowman = new Bowman(1);
-        expect(bowman.attack).toBe(25);
-        expect(bowman.defence).toBe(25);
-        expect(bowman.health).toBe(50);
-        expect(bowman.type).toBe('bowman');
-
-        const swordsman = new Swordsman(1);
-        expect(swordsman.attack).toBe(40);
-        expect(swordsman.defence).toBe(10);
-        expect(swordsman.health).toBe(50);
-        expect(swordsman.type).toBe('swordsman');
-
-        const magician = new Magician(1);
-        expect(magician.attack).toBe(10);
-        expect(magician.defence).toBe(40);
-        expect(magician.health).toBe(50);
-        expect(magician.type).toBe('magician');
-    });
+test('When player moving, cursor should be <pointer> style, cell should be selected green', () => {
+  const enteredIndex = 9;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('pointer');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected-green');
+  expect(selected).toBeTruthy();
+  const isMovable = calculateMove('swordsman', selectedIndex, enteredIndex);
+  expect(isMovable).toBeTruthy();
 });
 
-describe('Character generator', () => {
-    test('should generate infinite characters from allowedTypes', () => {
-        const allowedTypes = [Bowman, Swordsman, Magician];
-        const maxLevel = 4;
-        const generator = characterGenerator(allowedTypes, maxLevel);
-
-        const generatedTypes = new Set();
-        for (let i = 0; i < 100; i++) {
-            const character = generator.next().value;
-            expect(allowedTypes).toContain(character.constructor);
-            expect(character.level).toBeGreaterThanOrEqual(1);
-            expect(character.level).toBeLessThanOrEqual(maxLevel);
-            generatedTypes.add(character.constructor);
-        }
-
-        expect(generatedTypes.size).toBe(allowedTypes.length);
-    });
+test('When player moving, cursor should be <pointer> style, cell should be selected green', () => {
+  const enteredIndex = 18;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('pointer');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected-green');
+  expect(selected).toBeTruthy();
+  const isMovable = calculateMove('swordsman', selectedIndex, enteredIndex);
+  expect(isMovable).toBeTruthy();
 });
 
-describe('Team generation', () => {
-    test('should generate a team with correct number and level range', () => {
-        const allowedTypes = [Bowman, Swordsman, Magician];
-        const maxLevel = 4;
-        const characterCount = 5;
-        const team = generateTeam(allowedTypes, maxLevel, characterCount);
+test('When player moving, cursor should be <pointer> style, cell should be selected green', () => {
+  const enteredIndex = 27;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('pointer');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected-green');
+  expect(selected).toBeTruthy();
+  const isMovable = calculateMove('swordsman', selectedIndex, enteredIndex);
+  expect(isMovable).toBeTruthy();
+});
 
-        expect(team).toHaveLength(characterCount);
+test('When player moving, cursor should be <pointer> style, cell should be selected green', () => {
+  const enteredIndex = 36;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('pointer');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected-green');
+  expect(selected).toBeTruthy();
+  const isMovable = calculateMove('swordsman', selectedIndex, enteredIndex);
+  expect(isMovable).toBeTruthy();
+});
 
-        team.forEach((character) => {
-            expect(allowedTypes).toContain(character.constructor);
-            expect(character.level).toBeGreaterThanOrEqual(1);
-            expect(character.level).toBeLessThanOrEqual(maxLevel);
-        });
-    });
+test('When player moving over max radius, cursor should be <not-allowed> style, cell should be not selected', () => {
+  const enteredIndex = 5;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('not-allowed');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected');
+  expect(selected).toBeFalsy();
+  const isMovable = calculateMove('swordsman', selectedIndex, enteredIndex);
+  expect(isMovable).toBeFalsy();
+});
+test('When player moving over max radius, cursor should be <not-allowed> style, cell should be not selected', () => {
+  const enteredIndex = 40;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('not-allowed');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected');
+  expect(selected).toBeFalsy();
+  const isMovable = calculateMove('swordsman', selectedIndex, enteredIndex);
+  expect(isMovable).toBeFalsy();
+});
+test('When player moving over max radius, cursor should be <not-allowed> style, cell should be not selected', () => {
+  const enteredIndex = 45;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('not-allowed');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected');
+  expect(selected).toBeFalsy();
+  const isMovable = calculateMove('swordsman', selectedIndex, enteredIndex);
+  expect(isMovable).toBeFalsy();
+});
+
+test('When player aiming target outside max radius, cursor should be <not-allowed> style, cell should be not selected', () => {
+  const enteredIndex = 63;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('not-allowed');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected');
+  expect(selected).toBeFalsy();
+  const isAttackable = calculateAttack('swordsman', selectedIndex, enteredIndex);
+  expect(isAttackable).toBeFalsy();
+});
+
+test('When player aiming target inside max radius, cursor should be <crosshair> style, cell should be selected red', () => {
+  const enteredIndex = 1;
+  gameCtrl.onCellEnter(enteredIndex);
+  expect(gamePlay.boardEl.style.cursor).toBe('crosshair');
+  const selected = gamePlay.cells[enteredIndex].classList.contains('selected-red');
+  expect(selected).toBeTruthy();
+  const isAttackable = calculateAttack('swordsman', selectedIndex, enteredIndex);
+  expect(isAttackable).toBeTruthy();
+});
+
+test('Tagged template', () => {
+  const character = new Bowman(1);
+  const recieved = `${'\u{1F396}'}${character.level}${'\u{2694}'}${character.attack}${'\u{1F6E1}'}${character.defence}${'\u{2764}'}${character.health}`;
+  const expected = '🎖1⚔25🛡25❤100';
+  expect(recieved).toBe(expected);
+});
+
+test('Tagged template', () => {
+  const character = new Swordsman(1);
+  const recieved = `${'\u{1F396}'}${character.level}${'\u{2694}'}${character.attack}${'\u{1F6E1}'}${character.defence}${'\u{2764}'}${character.health}`;
+  const expected = '🎖1⚔40🛡10❤100';
+  expect(recieved).toBe(expected);
+});
+
+test('Tagged template', () => {
+  const character = new Magician(1);
+  const recieved = `${'\u{1F396}'}${character.level}${'\u{2694}'}${character.attack}${'\u{1F6E1}'}${character.defence}${'\u{2764}'}${character.health}`;
+  const expected = '🎖1⚔10🛡40❤100';
+  expect(recieved).toBe(expected);
+});
+
+test('Tagged template', () => {
+  const character = new Vampire(1);
+  const recieved = `${'\u{1F396}'}${character.level}${'\u{2694}'}${character.attack}${'\u{1F6E1}'}${character.defence}${'\u{2764}'}${character.health}`;
+  const expected = '🎖1⚔25🛡25❤100';
+  expect(recieved).toBe(expected);
+});
+
+test('Tagged template', () => {
+  const character = new Undead(1);
+  const recieved = `${'\u{1F396}'}${character.level}${'\u{2694}'}${character.attack}${'\u{1F6E1}'}${character.defence}${'\u{2764}'}${character.health}`;
+  const expected = '🎖1⚔40🛡10❤100';
+  expect(recieved).toBe(expected);
+});
+
+test('Tagged template', () => {
+  const character = new Daemon(1);
+  const recieved = `${'\u{1F396}'}${character.level}${'\u{2694}'}${character.attack}${'\u{1F6E1}'}${character.defence}${'\u{2764}'}${character.health}`;
+  const expected = '🎖1⚔10🛡40❤100';
+  expect(recieved).toBe(expected);
 });
